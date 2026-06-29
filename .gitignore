@@ -8,3 +8,7 @@ build/
 captures/
 *.apk
 setup-env.sh
+
+# build logs
+build.log
+t.log
