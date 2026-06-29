@@ -19,16 +19,22 @@ class VoiceRecorder(private val context: Context) {
         dir.listFiles { f -> f.extension.equals("m4a", true) }?.sortedBy { it.name } ?: emptyList()
 
     fun startRecording(): File {
+        stopRecording()
         val out = File(dir, "voice_${listClips().size + 1}_${System.nanoTime()}.m4a")
         val r = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) MediaRecorder(context)
                 else @Suppress("DEPRECATION") MediaRecorder()
-        r.setAudioSource(MediaRecorder.AudioSource.MIC)
-        r.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-        r.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-        r.setOutputFile(out.absolutePath)
-        r.prepare()
-        r.start()
-        recorder = r
+        try {
+            r.setAudioSource(MediaRecorder.AudioSource.MIC)
+            r.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+            r.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            r.setOutputFile(out.absolutePath)
+            r.prepare()
+            r.start()
+            recorder = r
+        } catch (e: Exception) {
+            try { r.release() } catch (_: Exception) {}
+            recorder = null
+        }
         return out
     }
 
@@ -44,15 +50,28 @@ class VoiceRecorder(private val context: Context) {
 
     fun playClip(file: File) {
         playback?.release()
-        playback = MediaPlayer().apply {
-            setDataSource(file.absolutePath)
-            setOnCompletionListener { it.release() }
-            prepare()
-            start()
+        playback = null
+        try {
+            playback = MediaPlayer().apply {
+                setDataSource(file.absolutePath)
+                setOnCompletionListener { it.release() }
+                prepare()
+                start()
+            }
+        } catch (e: Exception) {
+            playback?.release()
+            playback = null
         }
     }
 
     fun deleteClip(file: File): Boolean = file.delete()
 
     fun hasClips(): Boolean = listClips().isNotEmpty()
+
+    /** Release all media resources — call from Activity.onDestroy. */
+    fun release() {
+        stopRecording()
+        playback?.release()
+        playback = null
+    }
 }

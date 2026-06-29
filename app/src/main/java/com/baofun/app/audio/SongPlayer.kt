@@ -31,17 +31,21 @@ class SongPlayer(private val context: Context) {
     private fun playCurrent() {
         stop()
         val name = playlist.getOrNull(index) ?: return
-        val mp = MediaPlayer()
-        context.assets.openFd("songs/$name").use { afd ->
-            mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+        try {
+            val mp = MediaPlayer()
+            context.assets.openFd("songs/$name").use { afd ->
+                mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+            }
+            mp.setOnCompletionListener {
+                index = (index + 1) % playlist.size
+                playCurrent()
+            }
+            mp.prepare()
+            mp.start()
+            player = mp
+        } catch (e: Exception) {
+            player = null
         }
-        mp.setOnCompletionListener {
-            index = (index + 1) % playlist.size
-            playCurrent()
-        }
-        mp.prepare()
-        mp.start()
-        player = mp
     }
 
     fun stop() {
