@@ -199,6 +199,20 @@ class MainActivity : Activity() {
         songs.stop()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Song playback is stopped in onPause; resume it on return so the baby
+        // isn't left with a silent black screen after a transient interruption.
+        // Only resume if still within the 5-min cap; otherwise enter STOPPED.
+        if (mode == Mode.SONG) {
+            if (timer.isExpired(System.currentTimeMillis())) {
+                enterStopped()
+            } else {
+                songs.start()
+            }
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(timerTick)
