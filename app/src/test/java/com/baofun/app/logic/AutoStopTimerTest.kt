@@ -1,5 +1,6 @@
 package com.baofun.app.logic
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -28,6 +29,22 @@ class AutoStopTimerTest {
     @Test fun remainingMillisCountsDown() {
         val t = AutoStopTimer(limitMillis = 5 * 60_000L)
         t.start(nowMillis = 0L)
-        assertTrue(t.remainingMillis(nowMillis = 60_000L) == 4 * 60_000L)
+        assertEquals(4 * 60_000L, t.remainingMillis(nowMillis = 60_000L))
+    }
+
+    @Test fun notExpiredOneMillisBeforeLimit() {
+        val t = AutoStopTimer(limitMillis = 5 * 60_000L)
+        t.start(nowMillis = 0L)
+        assertFalse(t.isExpired(nowMillis = 5 * 60_000L - 1L))
+    }
+
+    @Test fun notExpiredBeforeStart() {
+        val t = AutoStopTimer(limitMillis = 5 * 60_000L)
+        assertFalse(t.isExpired(nowMillis = 9_999_999_999L))
+    }
+
+    @Test fun remainingIsFullLimitBeforeStart() {
+        val t = AutoStopTimer(limitMillis = 5 * 60_000L)
+        assertEquals(5 * 60_000L, t.remainingMillis(nowMillis = 9_999_999_999L))
     }
 }

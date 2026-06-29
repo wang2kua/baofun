@@ -1,7 +1,7 @@
 package com.baofun.app.logic
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class PitchZonesTest {
@@ -20,11 +20,21 @@ class PitchZonesTest {
     }
 
     @Test fun clampsOutOfBoundsToValidRange() {
-        val n = zones.noteIndexFor(x = -50f, y = 9999f, width = 300f, height = 300f)
-        assertTrue(n in 0..8)
+        // x clamps to col 0, y clamps to row 2 -> index 6
+        assertEquals(6, zones.noteIndexFor(x = -50f, y = 9999f, width = 300f, height = 300f))
+    }
+
+    @Test fun xAtExactWidthMapsToLastColumn() {
+        assertEquals(2, zones.noteIndexFor(x = 300f, y = 10f, width = 300f, height = 300f))
     }
 
     @Test fun zeroSizeDoesNotCrash() {
         assertEquals(0, zones.noteIndexFor(x = 5f, y = 5f, width = 0f, height = 0f))
+    }
+
+    @Test fun rejectsZeroColumns() {
+        assertThrows(IllegalArgumentException::class.java) {
+            PitchZones(columns = 0, rows = 3)
+        }
     }
 }

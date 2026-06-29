@@ -6,6 +6,8 @@ package com.baofun.app.logic
  * Pure logic — no Android types — so it is JVM unit-testable.
  */
 class PitchZones(val columns: Int = 3, val rows: Int = 3) {
+    init { require(columns >= 1 && rows >= 1) { "columns and rows must be >= 1" } }
+
     val noteCount: Int = columns * rows
 
     fun noteIndexFor(x: Float, y: Float, width: Float, height: Float): Int {
