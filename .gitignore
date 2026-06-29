@@ -12,3 +12,4 @@ setup-env.sh
 # build logs
 build.log
 t.log
+final.log
