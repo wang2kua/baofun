@@ -106,6 +106,10 @@ class MainActivity : Activity() {
 
     private fun enterStopped() {
         mode = Mode.STOPPED
+        if (isRecording) {
+            recorder.stopRecording()
+            isRecording = false
+        }
         songs.stop()
         view.setGlowEnabled(false)
         handler.removeCallbacks(timerTick)
@@ -158,6 +162,26 @@ class MainActivity : Activity() {
     private fun hasMicPermission(): Boolean =
         checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) ==
             PackageManager.PERMISSION_GRANTED
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1 &&
+            grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // Permission just granted — start recording immediately so the
+            // parent's first "record" tap isn't silently dropped.
+            if (!isRecording) {
+                recorder.startRecording()
+                isRecording = true
+                Toast.makeText(this, "录音中… 再次长按右上角停止", Toast.LENGTH_LONG).show()
+            }
+        }
+        screen.enterImmersive()
+    }
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
