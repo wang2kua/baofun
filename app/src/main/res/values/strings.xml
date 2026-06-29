@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">BaoFun</string>
+    <string name="menu_title">家长控制</string>
+    <string name="menu_mode_play">玩耍模式</string>
+    <string name="menu_mode_song">听歌模式</string>
+    <string name="menu_volume">音量</string>
+    <string name="menu_record">录爸妈的话</string>
+    <string name="menu_restart_timer">重新开始计时</string>
+    <string name="menu_exit">退出</string>
+    <string name="menu_airplane_hint">提示:给宝宝玩前请手动开启飞行模式或勿扰,App 无法拦截真实来电。建议在有微弱环境光的房间使用。</string>
+    <string name="timer_stopped">休息一下啦 (长按右上角重新开始)</string>
+</resources>
