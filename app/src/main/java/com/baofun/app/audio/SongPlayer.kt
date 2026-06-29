@@ -4,18 +4,21 @@ import android.content.Context
 import android.media.MediaPlayer
 
 /**
- * Plays baby songs bundled in assets/songs (e.g. user-supplied mp3s), looping
- * through the playlist. If no songs are present, play() is a safe no-op.
+ * Plays baby songs bundled in assets/songs, looping through the playlist.
+ * Accepts the common audio formats Android supports natively (.mp3 and .ogg).
+ * If no songs are present, start() is a safe no-op.
  */
 class SongPlayer(private val context: Context) {
     private var player: MediaPlayer? = null
     private var playlist: List<String> = emptyList()
     private var index = 0
 
+    private val supportedExtensions = listOf(".mp3", ".ogg")
+
     private fun loadPlaylist(): List<String> =
         try {
             (context.assets.list("songs") ?: emptyArray())
-                .filter { it.endsWith(".mp3", ignoreCase = true) }
+                .filter { name -> supportedExtensions.any { name.endsWith(it, ignoreCase = true) } }
                 .sorted()
         } catch (e: Exception) { emptyList() }
 
