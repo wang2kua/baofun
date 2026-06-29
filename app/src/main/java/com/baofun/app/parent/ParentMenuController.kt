@@ -9,6 +9,11 @@ import android.os.Looper
  *
  * The Activity feeds raw DOWN/UP events plus the touch location and view size.
  * Corner = top 20% of height AND right 20% of width.
+ *
+ * Note: there is no move tracking, so a finger that starts in the corner and
+ * drifts out while held still triggers after 3s. The Activity must map
+ * ACTION_CANCEL to onUp() and also call onUp() on lifecycle pause to drain any
+ * pending trigger.
  */
 class ParentMenuController(private val onTrigger: () -> Unit) {
     private val handler = Handler(Looper.getMainLooper())
@@ -26,6 +31,7 @@ class ParentMenuController(private val onTrigger: () -> Unit) {
 
     fun onDown(x: Float, y: Float, w: Int, h: Int) {
         if (inCorner(x, y, w, h)) {
+            handler.removeCallbacks(fire) // make re-arm idempotent (multi-touch safe)
             armed = true
             handler.postDelayed(fire, holdMs)
         }
