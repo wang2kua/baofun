@@ -124,8 +124,11 @@ class MainActivity : Activity() {
             getString(R.string.menu_restart_timer),
             getString(R.string.menu_exit)
         )
+        // NOTE: AlertDialog shows EITHER a message OR a list in its content area,
+        // not both. setMessage() would suppress the tappable items entirely, so
+        // the airplane hint goes into the title instead and the items stay shown.
         AlertDialog.Builder(this)
-            .setTitle(getString(R.string.menu_title))
+            .setTitle(getString(R.string.menu_title) + "\n\n" + getString(R.string.menu_airplane_hint))
             .setItems(items) { d, which ->
                 when (which) {
                     0 -> startPlayMode()
@@ -137,7 +140,6 @@ class MainActivity : Activity() {
                 d.dismiss()
                 screen.enterImmersive()
             }
-            .setMessage(getString(R.string.menu_airplane_hint))
             .setCancelable(true)
             .show()
     }
