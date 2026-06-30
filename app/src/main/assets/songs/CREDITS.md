@@ -19,6 +19,7 @@ must be added by the user from their own copies — see below.)
 | `09_frere_jacques.ogg` | Frère Jacques / 两只老虎 | Public domain |
 | `10_yankee_doodle.ogg` | Yankee Doodle (choral) | Public domain |
 | `11_molihua_jasmine.opus` | 茉莉花 (Jasmine Flower, Chinese folk song) | CC0 |
+| `12_libai_jingyesi.mp3` | 李白《静夜思》吟唱 (Li Bai poem, sung; ~9s, by moonofmagick via ccMixter) | CC0 |
 
 ## Adding your own songs (e.g. 贝乐虎)
 
