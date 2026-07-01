@@ -13,6 +13,7 @@ import com.baofun.app.audio.SongPlayer
 import com.baofun.app.audio.ToneEngine
 import com.baofun.app.logic.AutoStopTimer
 import com.baofun.app.logic.EasterEggTrigger
+import com.baofun.app.logic.GlissandoThrottle
 import com.baofun.app.logic.PitchZones
 import com.baofun.app.parent.ParentMenuController
 import com.baofun.app.system.Haptics
@@ -33,7 +34,8 @@ class MainActivity : Activity() {
 
     private val zones = PitchZones(3, 3)
     private val egg = EasterEggTrigger(8, 10)
-    private val timer = AutoStopTimer(5 * 60_000L)
+    private val glissando = GlissandoThrottle(80L)
+    private val timer = AutoStopTimer(10 * 60_000L)
 
     private val handler = Handler(Looper.getMainLooper())
     private var mode = Mode.PLAY
@@ -62,6 +64,7 @@ class MainActivity : Activity() {
         menu = ParentMenuController { openParentMenu() }
 
         view.tapListener = PlayView.TapListener { x, y, w, h -> onBabyTap(x, y, w, h) }
+        view.moveListener = PlayView.MoveListener { x, y, w, h -> onBabyDrag(x, y, w, h) }
 
         startPlayMode()
     }
@@ -82,6 +85,14 @@ class MainActivity : Activity() {
         tones.playNote(note)
         haptics.blip()
         if (egg.onTap() && recorder.hasClips()) recorder.playRandomClip()
+    }
+
+    private fun onBabyDrag(x: Float, y: Float, w: Int, h: Int) {
+        if (mode != Mode.PLAY) return
+        val note = zones.noteIndexFor(x, y, w.toFloat(), h.toFloat())
+        if (glissando.shouldEmit(note, System.currentTimeMillis())) {
+            tones.playNote(note)
+        }
     }
 
     private fun startPlayMode() {
