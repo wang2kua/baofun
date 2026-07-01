@@ -9,6 +9,7 @@ import android.os.Looper
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.baofun.app.audio.SleepPlayer
 import com.baofun.app.audio.SongPlayer
 import com.baofun.app.audio.SoundEngine
 import com.baofun.app.audio.ToneEngine
@@ -24,7 +25,7 @@ import com.baofun.app.voice.VoiceRecorder
 
 class MainActivity : Activity() {
 
-    private enum class Mode { PLAY, SONG, STOPPED }
+    private enum class Mode { PLAY, SONG, SLEEP, STOPPED }
 
     private lateinit var view: PlayView
     private lateinit var screen: ScreenController
@@ -33,6 +34,7 @@ class MainActivity : Activity() {
     private lateinit var songs: SongPlayer
     private lateinit var recorder: VoiceRecorder
     private lateinit var sounds: SoundEngine
+    private lateinit var sleep: SleepPlayer
     private lateinit var settings: Settings
     private lateinit var menu: ParentMenuController
 
@@ -44,6 +46,17 @@ class MainActivity : Activity() {
     private val handler = Handler(Looper.getMainLooper())
     private var mode = Mode.PLAY
     private var isRecording = false
+
+    private var sleepSongsDeadline = 0L
+    private val sleepSongsTick = object : Runnable {
+        override fun run() {
+            if (mode == Mode.SLEEP && System.currentTimeMillis() >= sleepSongsDeadline) {
+                enterStopped()
+            } else if (mode == Mode.SLEEP) {
+                handler.postDelayed(this, 1000L)
+            }
+        }
+    }
 
     private val timerTick = object : Runnable {
         override fun run() {
@@ -66,6 +79,8 @@ class MainActivity : Activity() {
         songs = SongPlayer(this)
         recorder = VoiceRecorder(this)
         sounds = SoundEngine(this)
+        sleep = SleepPlayer(this)
+        sleep.onFinished = { enterStopped() }
         settings = Settings(this)
         menu = ParentMenuController { openParentMenu() }
 
@@ -137,6 +152,29 @@ class MainActivity : Activity() {
         handler.postDelayed(timerTick, 1000L)
     }
 
+    private fun startSleepMode() {
+        mode = Mode.SLEEP
+        songs.stop()
+        view.setGlowEnabled(false) // pure black while sleeping
+        screen.applyMinBrightnessAndImmersive()
+        handler.removeCallbacks(timerTick) // sleep uses its own fade timer, not the 10-min cap
+        val total = 30 * 60_000L
+        val fade = 30_000L
+        when (settings.sleepContent) {
+            Settings.SleepContent.NOISE -> {
+                sleep.setBaseVolume(settings.volume.fraction)
+                sleep.start(total, fade, System.currentTimeMillis())
+            }
+            Settings.SleepContent.SONGS -> {
+                songs.setVolume(settings.volume.fraction)
+                songs.start()
+                sleepSongsDeadline = System.currentTimeMillis() + total
+                handler.removeCallbacks(sleepSongsTick)
+                handler.postDelayed(sleepSongsTick, 1000L)
+            }
+        }
+    }
+
     private fun enterStopped() {
         mode = Mode.STOPPED
         if (isRecording) {
@@ -144,6 +182,8 @@ class MainActivity : Activity() {
             isRecording = false
         }
         songs.stop()
+        sleep.stop()
+        handler.removeCallbacks(sleepSongsTick)
         view.setGlowEnabled(false)
         handler.removeCallbacks(timerTick)
         Toast.makeText(this, getString(R.string.timer_stopped), Toast.LENGTH_LONG).show()
@@ -232,19 +272,15 @@ class MainActivity : Activity() {
         super.onPause()
         menu.onUp()
         songs.stop()
+        sleep.stop()
     }
 
     override fun onResume() {
         super.onResume()
-        // Song playback is stopped in onPause; resume it on return so the baby
-        // isn't left with a silent black screen after a transient interruption.
-        // Only resume if still within the 5-min cap; otherwise enter STOPPED.
         if (mode == Mode.SONG) {
-            if (timer.isExpired(System.currentTimeMillis())) {
-                enterStopped()
-            } else {
-                songs.start()
-            }
+            if (timer.isExpired(System.currentTimeMillis())) enterStopped() else songs.start()
+        } else if (mode == Mode.SLEEP) {
+            startSleepMode() // restart sleep cleanly on return (fade timer resets)
         }
     }
 
@@ -255,6 +291,7 @@ class MainActivity : Activity() {
         songs.stop()
         recorder.release()
         sounds.release()
+        sleep.stop()
         screen.restoreBrightness()
     }
 }
