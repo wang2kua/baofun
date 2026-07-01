@@ -197,28 +197,57 @@ class MainActivity : Activity() {
         val items = arrayOf(
             getString(R.string.menu_mode_play),
             getString(R.string.menu_mode_song),
+            getString(R.string.menu_mode_sleep),
+            getString(R.string.menu_sound_toggle),
+            getString(R.string.menu_sleep_content),
+            getString(R.string.menu_volume_cycle),
             getString(R.string.menu_record),
             getString(R.string.menu_restart_timer),
             getString(R.string.menu_exit)
         )
-        // NOTE: AlertDialog shows EITHER a message OR a list in its content area,
-        // not both. setMessage() would suppress the tappable items entirely, so
-        // the airplane hint goes into the title instead and the items stay shown.
+        // AlertDialog shows EITHER message OR list, not both — hint goes in title.
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.menu_title) + "\n\n" + getString(R.string.menu_airplane_hint))
             .setItems(items) { d, which ->
                 when (which) {
                     0 -> startPlayMode()
                     1 -> startSongMode()
-                    2 -> toggleRecording()
-                    3 -> { startPlayMode() } // restart timer = re-enter play
-                    4 -> { finish() }
+                    2 -> startSleepMode()
+                    3 -> toggleSound()
+                    4 -> toggleSleepContent()
+                    5 -> cycleVolume()
+                    6 -> toggleRecording()
+                    7 -> startPlayMode() // restart timer = re-enter play
+                    8 -> finish()
                 }
                 d.dismiss()
                 screen.enterImmersive()
             }
             .setCancelable(true)
             .show()
+    }
+
+    private fun toggleSound() {
+        settings.playSound = if (settings.playSound == Settings.PlaySound.TONES)
+            Settings.PlaySound.ANIMALS else Settings.PlaySound.TONES
+        val msg = if (settings.playSound == Settings.PlaySound.ANIMALS)
+            R.string.toast_sound_animals else R.string.toast_sound_tones
+        Toast.makeText(this, getString(msg), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun toggleSleepContent() {
+        settings.sleepContent = if (settings.sleepContent == Settings.SleepContent.NOISE)
+            Settings.SleepContent.SONGS else Settings.SleepContent.NOISE
+        val msg = if (settings.sleepContent == Settings.SleepContent.SONGS)
+            R.string.toast_sleep_songs else R.string.toast_sleep_noise
+        Toast.makeText(this, getString(msg), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun cycleVolume() {
+        settings.volume = settings.volume.next()
+        applyVolume()
+        Toast.makeText(this, getString(R.string.toast_volume, settings.volume.name),
+            Toast.LENGTH_SHORT).show()
     }
 
     private fun toggleRecording() {
