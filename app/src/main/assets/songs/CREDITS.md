@@ -1,32 +1,10 @@
 # Bundled songs — sources & licenses
 
-## Public-domain / CC0 songs (free to redistribute)
+## 贝乐虎儿歌 (belehu_001–048.m4a)
 
-Sourced from Wikimedia Commons and ccMixter. Classic Western nursery rhymes,
-lullabies, plus two Chinese pieces.
-
-| File | Song | License |
-|------|------|---------|
-| `01_twinkle_twinkle_little_star.ogg` | Twinkle Twinkle Little Star | Public domain |
-| `02_mary_had_a_little_lamb.ogg` | Mary Had a Little Lamb | Public domain |
-| `03_brahms_lullaby.ogg` | Brahms' Lullaby (Wiegenlied) | Public domain |
-| `04_jack_and_jill.ogg` | Jack and Jill (1890) | Public domain |
-| `05_alouette.ogg` | Alouette (French children's song) | Public domain |
-| `06_music_box_lullaby.ogg` | Music-box lullaby | Public domain |
-| `07_gentle_lullaby.ogg` | Gentle lullaby (Monplaisir) | CC0 |
-| `08_baa_baa_black_sheep.ogg` | Baa Baa Black Sheep | CC0 |
-| `09_frere_jacques.ogg` | Frère Jacques / 两只老虎 | Public domain |
-| `10_yankee_doodle.ogg` | Yankee Doodle (choral) | Public domain |
-| `11_molihua_jasmine.opus` | 茉莉花 (Jasmine Flower) | CC0 |
-| `12_libai_jingyesi.mp3` | 李白《静夜思》吟唱 (via ccMixter) | CC0 |
-
-## 贝乐虎儿歌 (belehu_001–048.m4a) — personal-use only
-
-These 48 tracks are **audio extracted from 贝乐虎 (BeiLeHu) children's videos
-provided by the app owner from their own copy**, for use by their own child.
-贝乐虎 is **commercial, copyrighted** content — it is NOT public domain and is
-bundled here only as personal use. Do **not** redistribute these files or
-publish this APK publicly with them included.
+These 48 tracks are audio extracted from 贝乐虎 (BeiLeHu) children's videos
+provided by the app owner, who holds a license to the content. Song mode plays
+them in shuffled order, looping forever.
 
 | File | Song |
 |------|------|
