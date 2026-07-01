@@ -16,6 +16,7 @@ class SongPlayer(private val context: Context) {
     private var player: MediaPlayer? = null
     private var playlist: List<String> = emptyList()
     private var index = 0
+    private var volume = 1.0f
 
     private val supportedExtensions = listOf(".mp3", ".ogg", ".opus", ".m4a")
 
@@ -29,6 +30,11 @@ class SongPlayer(private val context: Context) {
 
     fun hasSongs(): Boolean = loadPlaylist().isNotEmpty()
 
+    fun setVolume(v: Float) {
+        volume = v.coerceIn(0f, 1f)
+        player?.setVolume(volume, volume)
+    }
+
     fun start() {
         playlist = loadPlaylist()
         if (playlist.isEmpty()) return
@@ -41,6 +47,7 @@ class SongPlayer(private val context: Context) {
         val name = playlist.getOrNull(index) ?: return
         try {
             val mp = MediaPlayer()
+            mp.setVolume(volume, volume)
             context.assets.openFd("songs/$name").use { afd ->
                 mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
             }
