@@ -60,9 +60,13 @@ class MainActivity : Activity() {
 
     private val timerTick = object : Runnable {
         override fun run() {
-            if (mode != Mode.STOPPED && timer.isExpired(System.currentTimeMillis())) {
+            // Only the 10-min cap modes (PLAY/SONG) are governed by this tick.
+            // SLEEP has its own 30-min fade timer, so guard on the active modes
+            // explicitly rather than "!= STOPPED" (which would wrongly include SLEEP).
+            if ((mode == Mode.PLAY || mode == Mode.SONG) &&
+                timer.isExpired(System.currentTimeMillis())) {
                 enterStopped()
-            } else {
+            } else if (mode == Mode.PLAY || mode == Mode.SONG) {
                 handler.postDelayed(this, 1000L)
             }
         }
