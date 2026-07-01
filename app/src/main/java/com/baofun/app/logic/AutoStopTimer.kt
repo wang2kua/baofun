@@ -2,7 +2,7 @@ package com.baofun.app.logic
 
 /**
  * Hard usage cap. Caller injects the current time (System.currentTimeMillis())
- * so the logic is deterministic and JVM-testable. Default 5 minutes.
+ * so the logic is deterministic and JVM-testable. Limit is injected by the caller.
  *
  * The timer must be armed by calling [start] before it can expire. Until then
  * it is fail-safe: [isExpired] returns false and [remainingMillis] returns the

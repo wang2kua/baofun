@@ -139,6 +139,8 @@ class MainActivity : Activity() {
         glissando.reset()
         mode = Mode.PLAY
         songs.stop()
+        sleep.stop()
+        handler.removeCallbacks(sleepSongsTick)
         view.setGlowEnabled(true)
         screen.applyMinBrightnessAndImmersive()
         timer.start(System.currentTimeMillis())
@@ -148,6 +150,8 @@ class MainActivity : Activity() {
 
     private fun startSongMode() {
         mode = Mode.SONG
+        sleep.stop()
+        handler.removeCallbacks(sleepSongsTick)
         view.setGlowEnabled(false) // pure black while listening
         screen.applyMinBrightnessAndImmersive()
         songs.start()
@@ -320,6 +324,7 @@ class MainActivity : Activity() {
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(timerTick)
+        handler.removeCallbacks(sleepSongsTick)
         tones.release()
         songs.stop()
         recorder.release()
