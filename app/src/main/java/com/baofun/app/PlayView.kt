@@ -20,6 +20,7 @@ import android.view.View
 class PlayView(context: Context) : View(context) {
 
     fun interface TapListener { fun onTap(x: Float, y: Float, width: Int, height: Int) }
+    fun interface MoveListener { fun onMove(x: Float, y: Float, width: Int, height: Int) }
 
     private class Glow(val x: Float, val y: Float, var bornAt: Long)
 
@@ -30,6 +31,7 @@ class PlayView(context: Context) : View(context) {
     private val warm = Color.rgb(255, 196, 120) // low-saturation amber
     private var glowEnabled = true
     var tapListener: TapListener? = null
+    var moveListener: MoveListener? = null
 
     fun setGlowEnabled(enabled: Boolean) {
         glowEnabled = enabled
@@ -48,6 +50,17 @@ class PlayView(context: Context) : View(context) {
                 invalidate()
             }
             tapListener?.onTap(x, y, width, height)
+            return true
+        }
+        if (event.actionMasked == MotionEvent.ACTION_MOVE) {
+            val idx = event.actionIndex
+            val x = event.getX(idx)
+            val y = event.getY(idx)
+            if (glowEnabled) {
+                glows.add(Glow(x, y, System.currentTimeMillis()))
+                invalidate()
+            }
+            moveListener?.onMove(x, y, width, height)
             return true
         }
         return true
