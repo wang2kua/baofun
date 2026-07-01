@@ -10,12 +10,14 @@ import android.view.MotionEvent
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.baofun.app.audio.SongPlayer
+import com.baofun.app.audio.SoundEngine
 import com.baofun.app.audio.ToneEngine
 import com.baofun.app.logic.AutoStopTimer
 import com.baofun.app.logic.EasterEggTrigger
 import com.baofun.app.logic.GlissandoThrottle
 import com.baofun.app.logic.PitchZones
 import com.baofun.app.parent.ParentMenuController
+import com.baofun.app.settings.Settings
 import com.baofun.app.system.Haptics
 import com.baofun.app.system.ScreenController
 import com.baofun.app.voice.VoiceRecorder
@@ -30,6 +32,8 @@ class MainActivity : Activity() {
     private lateinit var tones: ToneEngine
     private lateinit var songs: SongPlayer
     private lateinit var recorder: VoiceRecorder
+    private lateinit var sounds: SoundEngine
+    private lateinit var settings: Settings
     private lateinit var menu: ParentMenuController
 
     private val zones = PitchZones(3, 3)
@@ -61,11 +65,14 @@ class MainActivity : Activity() {
         tones = ToneEngine()
         songs = SongPlayer(this)
         recorder = VoiceRecorder(this)
+        sounds = SoundEngine(this)
+        settings = Settings(this)
         menu = ParentMenuController { openParentMenu() }
 
         view.tapListener = PlayView.TapListener { x, y, w, h -> onBabyTap(x, y, w, h) }
         view.moveListener = PlayView.MoveListener { x, y, w, h -> onBabyDrag(x, y, w, h) }
 
+        applyVolume()
         startPlayMode()
     }
 
@@ -82,20 +89,35 @@ class MainActivity : Activity() {
     private fun onBabyTap(x: Float, y: Float, w: Int, h: Int) {
         if (mode != Mode.PLAY) return
         val note = zones.noteIndexFor(x, y, w.toFloat(), h.toFloat())
-        tones.playNote(note)
+        playPlayModeSound(note)
         haptics.blip()
         if (egg.onTap() && recorder.hasClips()) recorder.playRandomClip()
+    }
+
+    private fun playPlayModeSound(note: Int) {
+        when (settings.playSound) {
+            Settings.PlaySound.ANIMALS -> if (sounds.count() > 0) sounds.playSound(note) else tones.playNote(note)
+            Settings.PlaySound.TONES -> tones.playNote(note)
+        }
+    }
+
+    private fun applyVolume() {
+        val f = settings.volume.fraction
+        tones.setVolumePercent(settings.volume.percent)
+        songs.setVolume(f)
+        sounds.setVolume(f)
     }
 
     private fun onBabyDrag(x: Float, y: Float, w: Int, h: Int) {
         if (mode != Mode.PLAY) return
         val note = zones.noteIndexFor(x, y, w.toFloat(), h.toFloat())
         if (glissando.shouldEmit(note, System.currentTimeMillis())) {
-            tones.playNote(note)
+            playPlayModeSound(note)
         }
     }
 
     private fun startPlayMode() {
+        glissando.reset()
         mode = Mode.PLAY
         songs.stop()
         view.setGlowEnabled(true)
@@ -232,6 +254,7 @@ class MainActivity : Activity() {
         tones.release()
         songs.stop()
         recorder.release()
+        sounds.release()
         screen.restoreBrightness()
     }
 }
