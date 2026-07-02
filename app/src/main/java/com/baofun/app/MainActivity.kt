@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.MotionEvent
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.baofun.app.audio.SleepPlayer
@@ -28,6 +29,7 @@ class MainActivity : Activity() {
     private enum class Mode { PLAY, SONG, SLEEP, STOPPED }
 
     private lateinit var view: PlayView
+    private lateinit var dashboard: DashboardView
     private lateinit var screen: ScreenController
     private lateinit var haptics: Haptics
     private lateinit var tones: ToneEngine
@@ -86,13 +88,40 @@ class MainActivity : Activity() {
         sleep = SleepPlayer(this)
         sleep.onFinished = { enterStopped() }
         settings = Settings(this)
-        menu = ParentMenuController { openParentMenu() }
+        menu = ParentMenuController { onLongPressCorner() }
 
         view.tapListener = PlayView.TapListener { x, y, w, h -> onBabyTap(x, y, w, h) }
         view.moveListener = PlayView.MoveListener { x, y, w, h -> onBabyDrag(x, y, w, h) }
 
         applyVolume()
-        startPlayMode()
+        dashboard = DashboardView(this)
+        dashboard.listener = object : DashboardView.Listener {
+            override fun onPlay() { startPlayMode() }
+            override fun onSong() { startSongMode() }
+            override fun onSleep() { startSleepMode() }
+            override fun onSettings() { openSettings() }
+        }
+        showDashboard()
+    }
+
+    private fun showDashboard() {
+        mode = Mode.STOPPED
+        songs.stop()
+        sleep.stop()
+        handler.removeCallbacks(timerTick)
+        handler.removeCallbacks(sleepSongsTick)
+        setContentView(dashboard)
+        screen.restoreBrightness()
+        screen.enterImmersive()
+    }
+
+    private fun enterModeView() {
+        (view.parent as? ViewGroup)?.removeView(view)
+        setContentView(view)
+    }
+
+    private fun onLongPressCorner() {
+        if (mode != Mode.STOPPED) showDashboard()
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
@@ -136,6 +165,7 @@ class MainActivity : Activity() {
     }
 
     private fun startPlayMode() {
+        enterModeView()
         glissando.reset()
         mode = Mode.PLAY
         songs.stop()
@@ -151,6 +181,7 @@ class MainActivity : Activity() {
     }
 
     private fun startSongMode() {
+        enterModeView()
         mode = Mode.SONG
         sleep.stop()
         handler.removeCallbacks(sleepSongsTick)
@@ -163,6 +194,7 @@ class MainActivity : Activity() {
     }
 
     private fun startSleepMode() {
+        enterModeView()
         mode = Mode.SLEEP
         songs.stop()
         view.setGlowEnabled(false) // pure black while sleeping
@@ -199,61 +231,75 @@ class MainActivity : Activity() {
         Toast.makeText(this, getString(R.string.timer_stopped), Toast.LENGTH_LONG).show()
     }
 
-    private fun openParentMenu() {
+    private fun openSettings() {
+        val vol = when (settings.volume) {
+            com.baofun.app.logic.VolumeLevels.LOW -> "小"
+            com.baofun.app.logic.VolumeLevels.MEDIUM -> "中"
+            com.baofun.app.logic.VolumeLevels.HIGH -> "大"
+        }
+        val sound = if (settings.playSound == Settings.PlaySound.TONES) "乐音" else "动物叫声"
+        val sleepC = if (settings.sleepContent == Settings.SleepContent.NOISE) "白噪音" else "儿歌"
+        val glow = when (settings.glowColor) {
+            com.baofun.app.logic.GlowTheme.AMBER -> "暖橙"
+            com.baofun.app.logic.GlowTheme.GREEN -> "柔绿"
+            com.baofun.app.logic.GlowTheme.BLUE -> "淡蓝"
+            com.baofun.app.logic.GlowTheme.PINK -> "暖粉"
+        }
+        val egg = if (settings.easterEggEnabled) "开" else "关"
         val items = arrayOf(
-            getString(R.string.menu_mode_play),
-            getString(R.string.menu_mode_song),
-            getString(R.string.menu_mode_sleep),
-            getString(R.string.menu_sound_toggle),
-            getString(R.string.menu_sleep_content),
-            getString(R.string.menu_volume_cycle),
-            getString(R.string.menu_record),
-            getString(R.string.menu_restart_timer),
-            getString(R.string.menu_exit)
+            "音量:$vol",
+            "玩耍音效:$sound",
+            "哄睡内容:$sleepC",
+            "微光颜色:$glow",
+            "爸妈录音彩蛋:$egg",
+            getString(R.string.rec_title),
+            getString(R.string.settings_back)
         )
-        // AlertDialog shows EITHER message OR list, not both — hint goes in title.
         AlertDialog.Builder(this)
-            .setTitle(getString(R.string.menu_title) + "\n\n" + getString(R.string.menu_airplane_hint))
+            .setTitle(getString(R.string.settings_title))
             .setItems(items) { d, which ->
                 when (which) {
-                    0 -> startPlayMode()
-                    1 -> startSongMode()
-                    2 -> startSleepMode()
-                    3 -> toggleSound()
-                    4 -> toggleSleepContent()
-                    5 -> cycleVolume()
-                    6 -> toggleRecording()
-                    7 -> startPlayMode() // restart timer = re-enter play
-                    8 -> finish()
+                    0 -> { settings.volume = settings.volume.next(); applyVolume(); openSettings() }
+                    1 -> { settings.playSound = if (settings.playSound == Settings.PlaySound.TONES)
+                                Settings.PlaySound.ANIMALS else Settings.PlaySound.TONES; openSettings() }
+                    2 -> { settings.sleepContent = if (settings.sleepContent == Settings.SleepContent.NOISE)
+                                Settings.SleepContent.SONGS else Settings.SleepContent.NOISE; openSettings() }
+                    3 -> { settings.glowColor = settings.glowColor.next(); openSettings() }
+                    4 -> { settings.easterEggEnabled = !settings.easterEggEnabled; openSettings() }
+                    5 -> { d.dismiss(); openRecordingManager() }
+                    6 -> { d.dismiss(); showDashboard() }
                 }
-                d.dismiss()
-                screen.enterImmersive()
             }
-            .setCancelable(true)
+            .setOnCancelListener { showDashboard() }
             .show()
     }
 
-    private fun toggleSound() {
-        settings.playSound = if (settings.playSound == Settings.PlaySound.TONES)
-            Settings.PlaySound.ANIMALS else Settings.PlaySound.TONES
-        val msg = if (settings.playSound == Settings.PlaySound.ANIMALS)
-            R.string.toast_sound_animals else R.string.toast_sound_tones
-        Toast.makeText(this, getString(msg), Toast.LENGTH_SHORT).show()
-    }
-
-    private fun toggleSleepContent() {
-        settings.sleepContent = if (settings.sleepContent == Settings.SleepContent.NOISE)
-            Settings.SleepContent.SONGS else Settings.SleepContent.NOISE
-        val msg = if (settings.sleepContent == Settings.SleepContent.SONGS)
-            R.string.toast_sleep_songs else R.string.toast_sleep_noise
-        Toast.makeText(this, getString(msg), Toast.LENGTH_SHORT).show()
-    }
-
-    private fun cycleVolume() {
-        settings.volume = settings.volume.next()
-        applyVolume()
-        Toast.makeText(this, getString(R.string.toast_volume, settings.volume.name),
-            Toast.LENGTH_SHORT).show()
+    private fun openRecordingManager() {
+        val clips = recorder.listClips()
+        val items = ArrayList<String>()
+        items.add(if (isRecording) getString(R.string.rec_stop) else getString(R.string.rec_start))
+        if (clips.isEmpty()) {
+            items.add(getString(R.string.rec_none))
+        } else {
+            for (i in clips.indices) items.add(getString(R.string.rec_play, i + 1))
+            for (i in clips.indices) items.add(getString(R.string.rec_delete, i + 1))
+        }
+        items.add(getString(R.string.settings_back))
+        val arr = items.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.rec_title))
+            .setItems(arr) { d, which ->
+                val n = clips.size
+                when {
+                    which == 0 -> { toggleRecording(); d.dismiss(); openRecordingManager() }
+                    clips.isEmpty() && which == 1 -> { d.dismiss(); openRecordingManager() }
+                    which in 1..n -> { recorder.playClip(clips[which - 1]); d.dismiss(); openRecordingManager() }
+                    which in (n + 1)..(2 * n) -> { recorder.deleteClip(clips[which - 1 - n]); d.dismiss(); openRecordingManager() }
+                    else -> { d.dismiss(); openSettings() }
+                }
+            }
+            .setOnCancelListener { openSettings() }
+            .show()
     }
 
     private fun toggleRecording() {
