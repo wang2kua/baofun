@@ -18,4 +18,12 @@
     <string name="toast_sleep_noise">哄睡:白噪音</string>
     <string name="toast_sleep_songs">哄睡:儿歌</string>
     <string name="toast_volume">音量:%1$s</string>
+    <string name="settings_title">设置</string>
+    <string name="settings_back">返回看板</string>
+    <string name="rec_title">录音管理</string>
+    <string name="rec_start">开始录音</string>
+    <string name="rec_stop">停止录音</string>
+    <string name="rec_play">试听第 %1$d 条</string>
+    <string name="rec_delete">删除第 %1$d 条</string>
+    <string name="rec_none">还没有录音</string>
 </resources>
