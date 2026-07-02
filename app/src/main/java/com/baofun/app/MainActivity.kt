@@ -218,17 +218,16 @@ class MainActivity : Activity() {
     }
 
     private fun enterStopped() {
-        mode = Mode.STOPPED
         if (isRecording) {
             recorder.stopRecording()
             isRecording = false
         }
-        songs.stop()
-        sleep.stop()
-        handler.removeCallbacks(sleepSongsTick)
-        view.setGlowEnabled(false)
-        handler.removeCallbacks(timerTick)
         Toast.makeText(this, getString(R.string.timer_stopped), Toast.LENGTH_LONG).show()
+        // Return to the dashboard instead of leaving a dim black screen the
+        // parent can't escape (long-press is disabled while STOPPED).
+        // showDashboard() sets mode=STOPPED, stops audio, cancels timers, and
+        // restores normal brightness.
+        showDashboard()
     }
 
     private fun openSettings() {

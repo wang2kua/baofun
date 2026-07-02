@@ -8,7 +8,7 @@
     <string name="menu_restart_timer">重新开始计时</string>
     <string name="menu_exit">退出</string>
     <string name="menu_airplane_hint">提示:给宝宝玩前请手动开启飞行模式或勿扰,App 无法拦截真实来电。建议在有微弱环境光的房间使用。</string>
-    <string name="timer_stopped">休息一下啦 (长按右上角重新开始)</string>
+    <string name="timer_stopped">休息一下啦~ 已回到主页</string>
     <string name="menu_mode_sleep">哄睡模式</string>
     <string name="menu_sound_toggle">音效:乐音/动物叫声</string>
     <string name="menu_sleep_content">哄睡内容:白噪音/儿歌</string>
