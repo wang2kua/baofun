@@ -110,7 +110,7 @@ class MainActivity : Activity() {
         val note = zones.noteIndexFor(x, y, w.toFloat(), h.toFloat())
         playPlayModeSound(note)
         haptics.blip()
-        if (egg.onTap() && recorder.hasClips()) recorder.playRandomClip()
+        if (settings.easterEggEnabled && egg.onTap() && recorder.hasClips()) recorder.playRandomClip()
     }
 
     private fun playPlayModeSound(note: Int) {
@@ -142,6 +142,8 @@ class MainActivity : Activity() {
         sleep.stop()
         handler.removeCallbacks(sleepSongsTick)
         view.setGlowEnabled(true)
+        val c = settings.glowColor
+        view.setGlowColor(c.red, c.green, c.blue)
         screen.applyMinBrightnessAndImmersive()
         timer.start(System.currentTimeMillis())
         handler.removeCallbacks(timerTick)
