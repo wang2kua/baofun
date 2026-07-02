@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- top bun: domed -->
+    <path android:fillColor="#E9A34B"
+        android:pathData="M26,48 C26,32 38,24 54,24 C70,24 82,32 82,48 Z"/>
+    <!-- sesame seeds -->
+    <path android:fillColor="#FFF4DE" android:pathData="M44,36 m-2.4,0 a2.4,1.6 0 1,0 4.8,0 a2.4,1.6 0 1,0 -4.8,0"/>
+    <path android:fillColor="#FFF4DE" android:pathData="M54,32 m-2.4,0 a2.4,1.6 0 1,0 4.8,0 a2.4,1.6 0 1,0 -4.8,0"/>
+    <path android:fillColor="#FFF4DE" android:pathData="M64,36 m-2.4,0 a2.4,1.6 0 1,0 4.8,0 a2.4,1.6 0 1,0 -4.8,0"/>
+    <!-- lettuce -->
+    <path android:fillColor="#7CB342"
+        android:pathData="M25,48 L83,48 L83,54 C77,54 73,60 67,56 C61,60 55,54 49,57 C43,54 37,60 31,56 C29,57 27,55 25,54 Z"/>
+    <!-- patty -->
+    <path android:fillColor="#8B4A2F" android:pathData="M28,56 L80,56 L80,66 L28,66 Z"/>
+    <!-- bottom bun -->
+    <path android:fillColor="#E9A34B" android:pathData="M35,66 L73,66 C78,66 80,68 80,72 C80,77 70,80 54,80 C38,80 28,77 28,72 C28,68 30,66 35,66 Z"/>
+</vector>

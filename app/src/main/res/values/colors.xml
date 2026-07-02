@@ -1,0 +1,8 @@
+<resources>
+    <color name="icon_bg">#FFF3A64B</color>
+    <color name="dashboard_bg">#FF1A1A1A</color>
+    <color name="tile_play">#FFE8804A</color>
+    <color name="tile_song">#FF4A9E8F</color>
+    <color name="tile_sleep">#FF5B6BB5</color>
+    <color name="tile_settings">#FF6B6B6B</color>
+</resources>
