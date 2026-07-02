@@ -28,7 +28,7 @@ class PlayView(context: Context) : View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val fadeMs = 2000L
     private val maxAlpha = 90 // out of 255 — dim
-    private val warm = Color.rgb(255, 196, 120) // low-saturation amber
+    private var warm = Color.rgb(255, 196, 120) // low-saturation amber (default)
     private var glowEnabled = true
     var tapListener: TapListener? = null
     var moveListener: MoveListener? = null
@@ -36,6 +36,11 @@ class PlayView(context: Context) : View(context) {
     fun setGlowEnabled(enabled: Boolean) {
         glowEnabled = enabled
         if (!enabled) glows.clear()
+        invalidate()
+    }
+
+    fun setGlowColor(r: Int, g: Int, b: Int) {
+        warm = Color.rgb(r, g, b)
         invalidate()
     }
 
