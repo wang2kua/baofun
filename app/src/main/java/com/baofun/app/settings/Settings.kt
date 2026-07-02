@@ -1,6 +1,7 @@
 package com.baofun.app.settings
 
 import android.content.Context
+import com.baofun.app.logic.GlowTheme
 import com.baofun.app.logic.VolumeLevels
 
 /**
@@ -26,4 +27,12 @@ class Settings(context: Context) {
         get() = runCatching { SleepContent.valueOf(prefs.getString("sleepContent", "") ?: "") }
             .getOrDefault(SleepContent.NOISE)
         set(v) { prefs.edit().putString("sleepContent", v.name).apply() }
+
+    var glowColor: GlowTheme
+        get() = GlowTheme.fromName(prefs.getString("glowColor", null))
+        set(v) { prefs.edit().putString("glowColor", v.name).apply() }
+
+    var easterEggEnabled: Boolean
+        get() = prefs.getBoolean("easterEggEnabled", true)
+        set(v) { prefs.edit().putBoolean("easterEggEnabled", v).apply() }
 }
